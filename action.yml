@@ -20,4 +20,4 @@ inputs:
 
 outputs:
   phrase:
-    description: output variable
+    description: output message

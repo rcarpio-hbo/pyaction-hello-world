@@ -12,14 +12,17 @@ def main(args: List[str]) -> None:
         args: STDIN arguments
     """
 
-    # now you can access the inputs like:
-    #    f"Hello {os.environ["INPUT_NAME"]}"
+    # reading the name variable from `with`
+    name = os.environ["INPUT_NAME"]
+    message = f"Hello {name}!"
 
-    # you can write to output like:
-    #   io.write_to_output({var: val, ...})
+    # writing to the buffer
+    io.write_to_output({"phrase": message})
 
-    pass
+    # now, people can echo `phrase`
+    # print(message)
 
 
 if __name__ == "__main__":
     main(sys.argv)
+
