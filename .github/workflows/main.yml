@@ -1,0 +1,23 @@
+name: Testing My hello-world Action
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - id: greetings
+        name: Using hello-world
+        # use the action that's inside the same repository
+        uses: ./
+        with:
+          name: Sadra
+
+      - name: Echo phrase
+        run: |
+          echo ${{ steps.greetings.outputs.phrase }}
+
