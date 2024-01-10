@@ -1,23 +1,85 @@
-name: PyAction Hello World
-description: This actions says Hello to you!
-author: lnxpy
+name: Scan repo with Wiz
+description: Performs a scan of a container image using Wiz (https://app.wiz.io/)
+author: WBD ContainerSec Team
 
-branding:
-  icon: check
-  color: blue
+# == inputs and outputs ==
+inputs:
+  action_exit_code:
+    description: 'Specify exit code when any security issues are found'
+    type: int
+  container_image:
+    description: 'Image name, including the tag/digest, or path to file (.tar, .tar.gz or .tgz)'
+    type: string
+    required: true
+  report_name:
+    description: 'Report Name'
+    type: string
+    required: false
+  scan_format:
+    description: Scan's output format. Available options are [human, json, sarif] (default "human")
+    type: choice
+    options: 
+    - human
+    - json
+    - sarif
+  scan_group_by:
+    description: Scan's output grouping field. Available options are [default, layer, resource] (default "default")
+    type: choice
+    required: false
+    options: 
+    - default
+    - layer
+    - resource
+  scan_policy:
+    description: 'Scan policy to use. Can be passed multiple times to evaluate multiple policies. If not set, the default policies are used'
+    type: string
+    required: false
+  scan_policy_hits_only:
+    description: 'Only display results that failed the applied policies'
+    type: bool
+    required: false
+  scan_project:
+    description: "Scan's scoped project UUID. If project is omitted, default to service account's associated projects"
+    type: string
+    required: false
+  scan_secrets:
+    description: 'Scan secrets (default true)'
+    type: bool
+    required: false
+  scan_show_secret_snippets:
+    description: 'Enable snippets in secrets'
+    type: bool
+    required: false
+  scan_show_vulnerability_details:
+    description: 'Show vulnerability descriptions and CVSS metrics from the NVD database'
+    type: bool
+    required: false
+  scan_tag:
+    description: 'Tags to mark the scan with, can be KEY or KEY=VALUE (default [])'
+    type: string
+    required: false
+  scan_timeout:
+    description: 'Operation timeout (default "1h0m0s")'
+    type: string
+    required: false
+  scan_used_dockerfile:
+    description: 'Dockerfile file used to build the image'
+    type: string
+    required: false
+  wiz_client_id:
+    description: 'Wiz service account client ID'
+    type: string
+    required: true
+  wiz_client_secret:
+    description: 'Wiz service account secret'
+    type: string
+    required: true
+outputs:
+  report_path:
+    description: generated report path
+  wiz_scan_status:
+    description: wiz scan status
 
 runs:
   using: docker
   image: Dockerfile
-
-# == inputs and outputs ==
-
-inputs:
-  name:
-    required: false
-    description: the person/thing you want to greet
-    default: World
-
-outputs:
-  phrase:
-    description: output message

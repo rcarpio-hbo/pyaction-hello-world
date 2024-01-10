@@ -1,6 +1,11 @@
 name: Testing My hello-world Action
 
-on: workflow_dispatch
+on: 
+  push:
+
+env:
+  container_image: alpine:latest
+  # container_image: roxcarpio/jenkins:2.277.3-centos7-dind
 
 jobs:
   build:
@@ -8,16 +13,43 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-
-      - id: greetings
-        name: Using hello-world
+        uses: actions/checkout@v3
+      - name: Pull image
+        run: |
+          docker pull ${{ env.container_image }}
+      - name: Scan container image
+        id: scan
+        # continue-on-error: true
         # use the action that's inside the same repository
         uses: ./
         with:
-          name: Sadra
+          # -- Mandatory configuration --
+          container_image: ${{ env.container_image }}
+          wiz_client_id: ${{ secrets.wiz_client_id }}
+          wiz_client_secret: ${{ secrets.wiz_client_secret }}
+          # -- Optional configuration --
+          # action_exit_code: 0
+          report_name: example.html
+          # scan_format: ''
+          # scan_group_by: ''
+          # scan_policy: ''
+          # scan_policy_hits_only: ''
+          # scan_project: ''
+          # scan_secrets: ''
+          # scan_show_secret_snippets: ''
+          # scan_show_vulnerability_details: ''
+          # scan_tag: ''
+          # scan_timeout: ''
+          # scan_used_dockerfile: ''
 
-      - name: Echo phrase
-        run: |
-          echo ${{ steps.greetings.outputs.phrase }}
+      # - name: Upload Wiz scan results to GitHub Security tab
+      #   uses: github/codeql-action/upload-sarif@v2
+      #   with:
+      #     sarif_file: ${{ steps.scan.outputs.report_path }}
+      - name: Archive Vulnerabilities Report
+        if: always() && steps.scan.outputs.report_path != ''
+        uses: actions/upload-artifact@v3
+        with:
+          name: wiz_vulnerabilities_secrets_report
+          path: ${{ steps.scan.outputs.report_path }}
 

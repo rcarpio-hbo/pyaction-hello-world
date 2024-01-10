@@ -1,8 +1,12 @@
-# setting the base-image to alpine
-FROM python:3-slim
+FROM wiziocli.azurecr.io/wizcli:latest as wizcli
+FROM python:3
+
+WORKDIR action
 
 # importing the action
 COPY . /action
+RUN pip install -r /action/requirements.txt
 
-# running the main.py file
-CMD [ "python", "/action/main.py" ]
+COPY --from=wizcli --chmod=777 /entrypoint /bin/wizcli
+
+ENTRYPOINT [ "python3","/action/main.py" ]

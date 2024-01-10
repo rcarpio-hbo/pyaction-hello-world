@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"> -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+
+<div class="container pt-5">
+    <h2>Container Image Scanning Report</h2>
+    <div class="row">
+        <div class="col p-3">
+          {%- if "PASSED" in scanning_status %}
+              <h5><strong>Scan Result: </strong><span class="badge rounded-pill text-bg-success">Passed</span></h5>
+          {%- elif "FAILED" in scanning_status %}
+              <h5><strong>Scan Result: </strong><span class="badge rounded-pill text-bg-danger">Failed</span></h5>
+          {%- elif "WARN" in scanning_status %}
+              <h5><strong>Scan Result: </strong><span class="badge rounded-pill text-bg-warning">Warn</span></h5>
+          {%- endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-8">
+            <h5>Metadata</h5>
+            <div class="lh-base">
+                {% if scan_metadata.scan_time %}<div><strong>Scan Time:</strong> {{ scan_metadata.scan_time }}</div>{% endif %}
+                {% if scan_metadata.image_scanned %}<div><strong>Resource:</strong> {{ scan_metadata.image_scanned }}</div>{% endif %}
+                {% if scan_metadata.files_scanned %}<div><strong>Files scanned:</strong> {{ scan_metadata.files_scanned }}</div>{% endif %}
+                {% if scan_metadata.directories_scanned %}<div><strong>Directories scanned:</strong> {{ scan_metadata.directories_scanned }}</div>{% endif %}
+                {% if scan_metadata.committed_by %}<div><strong>Committed by:</strong> {{ scan_metadata.committed_by }}</div>{% endif %}
+                {% if scan_metadata.commit_hash %}<div><strong>Commit Hash:</strong> <a href="{{ scan_metadata.github_server_url }}/{{ scan_metadata.github_repository }}/commit/{{ scan_metadata.commit_hash }}">{{ scan_metadata.commit_hash }}</a></div>{% endif %}
+                {% if scan_metadata.branch_name %}<div><strong>Branch name:</strong> {{ scan_metadata.branch_name }}</div>{% endif %}
+                {% if scan_metadata.github_repository %}<div><strong>Repo URL:</strong> <a href="{{ scan_metadata.github_server_url }}/{{ scan_metadata.github_repository }}">{{ scan_metadata.github_repository }}</a></div>{% endif %}
+                {% if scan_metadata.evaluated_policies %}<div><strong>Evaluated policies</strong> {{ scan_metadata.evaluated_policies }}</div>{% endif %}
+            </div>
+        </div>
+        {%- if vulnerabilities_table %}
+        <div class="col-4">
+            <h5>Result Summary</h5>
+            <div class="lh-base">
+                <div>🔴&nbsp;<strong>Critical</strong> {{ vuln_summary.critical_vuln }}</div>
+                <div>🟠&nbsp;<strong>High</strong> {{ vuln_summary.high_vuln }}</div>
+                <div>🟡&nbsp;<strong>Medium</strong> {{ vuln_summary.medium_vuln }}</div>
+                <div>🟢&nbsp;<strong>Low</strong> {{ vuln_summary.low_vuln }}</div>
+                <div>🔵&nbsp;<strong>Info</strong> {{ vuln_summary.info_vuln }}</div>
+                <div>⚪&nbsp;<strong>Unfixed</strong> {{ vuln_summary.unfixed_vuln }}</div>
+                <div><small>Total: {{ vuln_summary.total_vuln }}, out of which {{ vuln_summary.fixable_vuln }} are fixable</small></div>
+            </div>
+        </div>
+        {% endif -%}
+    </div>
+</div>
+
+{%- if vulnerabilities_table %}
+  {%- set vuln_tab_active='active' %}
+  {%- set vuln_aria_selected='true' %}
+  {%- set vuln_show='show' %}
+  {%- set secrets_tab_active='' %}
+  {%- set secrets_aria_selected='false' %}
+  {%- set secrets_show='' %}
+{%- else %}
+  {%- set vuln_tab_active='' %}
+  {%- set vuln_aria_selected='false' %}
+  {%- set vuln_show='' %}
+  {%- set secrets_tab_active='active' %}
+  {%- set secrets_aria_selected='true' %}
+  {%- set secrets_show='show' %}
+{% endif -%}
+
+<nav>
+  <div class="container pt-5 nav nav-tabs" id="nav-tab" role="tablist">
+    {%- if vulnerabilities_table %}
+      <button class="nav-link {{ vuln_tab_active }}" id="nav-vulnerabilities-tab" data-bs-toggle="tab" data-bs-target="#nav-vulnerabilities" type="button" role="tab" aria-controls="nav-vulnerabilities" aria-selected="{{ vuln_aria_selected }}">Vulnerabilities</button>
+    {%- endif %}
+    {%- if secrets_table %}
+      <button class="nav-link {{ secrets_tab_active }}" id="nav-secrets-tab" data-bs-toggle="tab" data-bs-target="#nav-secrets" type="button" role="tab" aria-controls="nav-secrets" aria-selected="{{ secrets_aria_selected }}">Secrets</button>
+    {%- endif %}
+  </div>
+</nav>
+
+<div class="container pt-4 tab-content" id="nav-tabContent">
+  {%- if vulnerabilities_table %}
+  <div class="tab-pane fade {{ vuln_show }} {{ vuln_tab_active }}" id="nav-vulnerabilities" role="tabpanel" aria-labelledby="nav-vulnerabilities-tab" tabindex="0">
+    <p>Type something in the search bar to search the table:</p>  
+    <input class="form-control" id="myInput" type="text" placeholder="🔎 Find vulnerabilities ...">
+    <br>
+      {{ vulnerabilities_table }}
+  </div>
+  {%- endif %}
+  {%- if secrets_table %}
+  <div class="tab-pane fade {{ secrets_show }} {{ secrets_tab_active }}" id="nav-secrets" role="tabpanel" aria-labelledby="nav-secrets-tab" tabindex="0">
+    {{ secrets_table }}
+  </div>
+  {%- endif %}
+</div>
+
+<script>
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+</script>
+
+</body>
+</html>

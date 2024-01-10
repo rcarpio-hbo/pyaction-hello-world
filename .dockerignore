@@ -25,3 +25,7 @@ Dockerfile
 .github/
 
 .git/
+
+# Ignore wizcli metadata and binaries
+wizcli
+output/
